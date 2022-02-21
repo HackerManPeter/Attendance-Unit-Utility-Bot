@@ -18,6 +18,7 @@ def send_polls(message):
         chat_id=message.chat.id,
         question=poll_question,
         options=options,
+        is_anonymous=False,
     )
 
     bot.forward_message(
