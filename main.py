@@ -2,6 +2,7 @@ import os
 import time
 from threading import Thread
 
+from helper import polls_result_text
 import schedule
 import telebot
 from dotenv import load_dotenv
@@ -12,7 +13,8 @@ FILE_PATH = int(os.environ['FILE_PATH'])
 
 bot = telebot.TeleBot(TOKEN)
 
-ADMIN_OWNER = os.environ['OWNER_ID']
+GS = os.environ['GS']
+AGS = os.environ['AGS']
 
 
 def schedule_checker():
@@ -24,14 +26,16 @@ def schedule_checker():
 def get_valid_ids(message):
     chat_id = message.chat.id
     chat_administrators = bot.get_chat_administrators(chat_id)
+
     return [admin.user.id for admin in chat_administrators]
 
 
-@bot.message_handler(commands=['schedule_polls'])
+@bot.message_handler(commands=['send_polls'])
 def handle_polls(message):
     allowed_ids = get_valid_ids(message)
+    allowed_ids += [GS, AGS]
 
-    if message.from_user.id in allowed_ids or message.from_user.id == ADMIN_OWNER:
+    if message.from_user.id in allowed_ids:
 
         poll_question = 'Did you attend Communion Service?'
         options = ['Yes', 'No']
@@ -43,11 +47,16 @@ def handle_polls(message):
     else:
         bot.reply_to(message, 'Sorry you can\'t send this command')
 
+        schedule.every().Friday.at('21:00').do(bot.send_message, chat_id=[AGS, GS], f)
+
+@bot.message.handler(commands=['stop_polls'])
+def stop_polls(message):
+
 
 @bot.message_handler(commands=['stop_polls'])
 def stop_polls(message):
     allowed_ids = get_valid_ids(message)
-    if message.from_user.id in allowed_ids or message.from_user.id == ADMIN_OWNER:
+    if message.from_user.id in allowed_ids or message.from_user.id == AGS:
         schedule.cancel_job()
 
 

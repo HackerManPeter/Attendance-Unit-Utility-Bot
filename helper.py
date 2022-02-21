@@ -1,0 +1,1 @@
+polls_result_text = f'Members Present:{po}'
