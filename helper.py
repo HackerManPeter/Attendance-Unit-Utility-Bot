@@ -1,4 +1,5 @@
 import os
+from black import List
 import telebot
 from dotenv import load_dotenv
 
@@ -11,22 +12,27 @@ bot = telebot.TeleBot(TOKEN)
 AGS = os.environ["AGS"]
 
 
-def send_polls(message):
+def send_polls(message) -> None:
+    """
+    Sends polls to group chat, forward responses to AGS and GS
+    """
     poll_question = "Did you attend Communion Service?"
     options = ["Yes", "No"]
     poll_response = bot.send_poll(
         chat_id=message.chat.id,
         question=poll_question,
         options=options,
-        is_anonymous=False,
     )
-
+    # Try using a list for chat_id
     bot.forward_message(
         chat_id=AGS, from_chat_id=poll_response.chat.id, message_id=poll_response.id
     )
 
 
-def get_valid_ids(message):
+def get_valid_ids(message) -> List:
+    """
+    Returns the User Id's of Group admins and AGS
+    """
     chat_id = message.chat.id
     chat_administrators = bot.get_chat_administrators(chat_id)
     valid_ids = [admin.user.id for admin in chat_administrators]

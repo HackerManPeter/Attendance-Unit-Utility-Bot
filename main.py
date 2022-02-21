@@ -14,7 +14,7 @@ TOKEN = os.environ["TOKEN"]
 bot = telebot.TeleBot(TOKEN)
 
 
-def schedule_checker():
+def scheduler():
     while True:
         run_pending()
         time.sleep(1)
@@ -22,6 +22,9 @@ def schedule_checker():
 
 @bot.message_handler(commands=["send_polls"])
 def handle_polls(message):
+    """
+    Command to schedule polls at 09:00 every Thursday Morning
+    """
     allowed_ids = get_valid_ids(message)
     if message.from_user.id not in allowed_ids:
         bot.reply_to(
@@ -32,12 +35,14 @@ def handle_polls(message):
 
     bot.reply_to(message, "Polls have been scheduled")
 
-    # every().thursday.at("9:00").do(send_polls, message)
-    every(30).seconds.do(send_polls, message).tag("Polling")
+    every().thursday.at("09:00").do(send_polls, message).tag("Polling")
 
 
 @bot.message_handler(commands=["stop_polls"])
 def stop_polls(message):
+    """
+    Command to stop polls sending polls
+    """
     allowed_ids = get_valid_ids(message)
     if message.from_user.id not in allowed_ids:
         bot.reply_to(
@@ -50,6 +55,6 @@ def stop_polls(message):
     bot.reply_to(message, "Polls have been stopped")
 
 
-Thread(target=schedule_checker, daemon=True).start()
+Thread(target=scheduler, daemon=True).start()
 
 bot.infinity_polling()
